@@ -38,6 +38,12 @@ typedef struct treino_estrutura {
 	unsigned nPraticas;				// número de práticas para viabilizar a alocação dinâmica
 	char alongar[TAMANHO_ALONGAR];	// ex. panturrilhas, lombar
 	// O treino desejado é referenciado por um char identificador = 65 (A)...
+	
+	/* time.h
+	void inicio;
+	void termino;
+	void reaval;
+	*/
 } treino_t;
 
 typedef struct usuario_estrutura {
