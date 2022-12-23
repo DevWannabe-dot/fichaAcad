@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <locale.h>
+#include <time.h>
 #include "util.h"
 
 // Constantes
@@ -87,13 +88,21 @@ uint8_t carregaUsuarios(exercicio_t** exercicios, treino_t** treinos, usuario_t*
 	return false;
 }
 
+void criarNomeArquivo(academia_t* academia, char nome[]) {
+	char str1[sizeof(unsigned long long) + 1];
+	char str2[] = ".txt";
+
+	util_converteInteiroParaTexto((int)academia->CNPJ, str1);
+	strcpy(nome, str1);
+	strncat(nome, str2, 4);
+}
+
 bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, academia_t* academia) {
 	FILE* arquivo;
 	int i = 1;
 	long cursor = 0;
 	char nome[TAMANHO_NOME];
-	char str1[sizeof(unsigned long long) + 1];
-	char str2[] = ".txt";
+	
 	uint8_t status_carregamento = 0;
 
 	arquivo = fopen("db.bin", "rb");
@@ -102,27 +111,18 @@ bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuar
 		fseek(arquivo, 0, SEEK_SET);
 
 		while (!feof(arquivo)) {
-			fread(nome, sizeof(char), TAMANHO_NOME, arquivo);
-			printf("Academia %i: %s;", i, nome);
-			i++;
-		}
-		printf("Deseja entrar em qual das academias registradas? ");
-		scanf("%i", &i);
-		if (!i) return false;
-
-		fseek(arquivo, (i-- * sizeof(academia_t)), SEEK_SET);
-		fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
-		fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
-		fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
-		fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
-		fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
+			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
+			printf("Academia: %s...", academia->nome);
+			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
+			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
+			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
+			fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
+		}	
 
 		fclose(arquivo);
 		
 		// academia.txt
-		util_converteInteiroParaTexto((int)academia->CNPJ, str1);
-		strcpy(nome, str1);
-		strncat(nome, str2, 4);
+		criarNomeArquivo(academia, nome);
 		arquivo = fopen(nome, "r");
 
 		if (arquivo) {
@@ -161,6 +161,25 @@ void listaMatriculas(void) {
 	
 }
 
+void salvaTudo(exercicio_t* exercicios, treino_t* treinos, usuario_t* usuarios, academia_t academia) {
+	FILE* arquivo = fopen("db.bin", "wb");
+	char nome[TAMANHO_NOME];
+
+	if (arquivo) {
+		fseek(arquivo, 0, SEEK_SET);
+
+		fwrite(&academia.nome, sizeof(char), TAMANHO_NOME, arquivo);
+		fwrite(&academia.CNPJ, sizeof(unsigned long long), 1, arquivo);
+		fwrite(&academia.endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
+		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo);
+		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo);
+
+		fclose(arquivo);
+	}
+	criarNomeArquivo(&academia, nome);
+	arquivo = fopen(nome, "w");
+}
+
 int main(int argc, char** argv) {
 	char lixo;
 	academia_t academia;
@@ -180,10 +199,10 @@ int main(int argc, char** argv) {
 
 	if (!carregaAcad(&exercicios, &treinos, &usuarios, &academia)) {
 		// Leitura dos dados da academia atual
-		memcpy(academia.nome, '\0', TAMANHO_NOME);
+		memset(academia.nome, '\0', TAMANHO_NOME);
 		academia.CNPJ = 0;
-		memcpy(academia.endereco, '\0', TAMANHO_ENDERECO);
-		memcpy(academia.email, '\0', TAMANHO_EMAIL);
+		memset(academia.endereco, '\0', TAMANHO_ENDERECO);
+		memset(academia.email, '\0', TAMANHO_EMAIL);
 		academia.telefone = 0;
 
 
@@ -221,6 +240,7 @@ int main(int argc, char** argv) {
 	// Leitura dos usuários da academia
 	
 	// salvamento em arquivo <db.bin>
+	salvaTudo(exercicios, treinos, usuarios, academia);
 
 	return SUCESSO;
 }
