@@ -168,6 +168,7 @@ int main(int argc, char** argv) {
 	treino_t* treinos = NULL;
 	exercicio_t* exercicios = NULL;
 	int nMatriculas = 0;
+	char backup[TAMANHO_ENDERECO];
 
 	setlocale(LC_CTYPE, "Portuguese");
 
@@ -179,21 +180,39 @@ int main(int argc, char** argv) {
 
 	if (!carregaAcad(&exercicios, &treinos, &usuarios, &academia)) {
 		// Leitura dos dados da academia atual
+		memcpy(academia.nome, '\0', TAMANHO_NOME);
+		academia.CNPJ = 0;
+		memcpy(academia.endereco, '\0', TAMANHO_ENDERECO);
+		memcpy(academia.email, '\0', TAMANHO_EMAIL);
+		academia.telefone = 0;
+
+
 		printf("<INSIRA 0 PARA PULAR UM PASSO>\n");
 		printf("Nome da academia: ");
-		fgets(academia.nome, TAMANHO_NOME, stdin);
-		util_removeQuebraLinhaFinal(academia.nome);
+		fgets(backup, TAMANHO_NOME, stdin);
+		if (backup[0] != 0) {
+			strcpy(academia.nome, backup);
+			util_removeQuebraLinhaFinal(academia.nome);
+		}
 
-		printf("CNPJ: ");
-		scanf("%llu%c", &academia.CNPJ, &lixo);
+		do {
+			printf("CNPJ (obrigatório): ");
+			scanf("%llu%c", &academia.CNPJ, &lixo);
+		} while (!(academia.CNPJ));
 
 		printf("Onde se encontra a academia? ");
-		fgets(academia.endereco, TAMANHO_ENDERECO, stdin);
-		util_removeQuebraLinhaFinal(academia.endereco);
+		fgets(backup, TAMANHO_ENDERECO, stdin);
+		if (backup[0] != 0) {
+			strcpy(academia.endereco, backup);
+			util_removeQuebraLinhaFinal(academia.endereco);
+		}
 
 		printf("E-mail de atendimento: ");
-		fgets(academia.email, TAMANHO_EMAIL, stdin);
-		util_removeQuebraLinhaFinal(academia.email);
+		fgets(backup, TAMANHO_EMAIL, stdin);
+		if (backup[0] != 0) {
+			strcpy(academia.email, backup);
+			util_removeQuebraLinhaFinal(academia.email);
+		}
 
 		printf("Telefone de atendimento: ");
 		scanf("%llu%c", &academia.telefone, &lixo);
