@@ -27,17 +27,17 @@
 #define TAMANHO_ALONGAR		(50+1)
 
 // Tipos
-typedef struct pratica_estrutura {
+typedef struct exercicio_estrutura {
 	char nomeMaquina[TAMANHO_NOME];	// "Supino maquina"
 	unsigned series;				// 3
 	unsigned reps;					// 15
 	float carga_kg;					// Carga em kg (inicializado 0.00kg para ser indefinido)
-} pratica_t;
+} exercicio_t;
 
 typedef struct treino_estrutura {
 	// Criado para possibilitar adicionar várias práticas já cadastradas ao treino
-	unsigned* PraticasPorIDs;		// IDs das práticas, sem estrutura* ou ** para fins de gravação em arquivo
-	unsigned nPraticas;				// número de práticas para viabilizar a alocação dinâmica
+	unsigned* ExerPorIDs;			// IDs das práticas, sem estrutura* ou ** para fins de gravação em arquivo
+	unsigned nExer;					// número de práticas para viabilizar a alocação dinâmica
 	char alongar[TAMANHO_ALONGAR];	// ex. panturrilhas, lombar
 	// O treino desejado é referenciado por um char identificador = 65 (A)...
 	
