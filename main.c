@@ -16,6 +16,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <locale.h>
+#include "util.h"
 
 // Constantes
 #define SUCESSO				(0)
@@ -63,19 +65,62 @@ typedef struct academia_estrutura {
 } academia_t;
 
 // Funções
+bool carregaTudo(academia_t* academia) {
+	FILE* arquivo;
+	int i = 1;
+
+	arquivo = fopen("db.bin", "rb");
+	if (arquivo) {
+		while (!feof(arquivo)) {
+			// fread
+			printf("Academia %i: %s;", i, academia->nome);
+			i++;
+		}
+		printf("Deseja entrar em qual das academias registradas? ");
+		scanf("%i", &i);
+		// fseek + fread
+
+		fclose(arquivo);
+		return true;
+	}
+	return false;
+}
+
 void listaMatriculas(void) {
 	
 }
 
 int main(int argc, char** argv) {
-	
+	char lixo;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
 	int nMatriculas = 0;
 
-	// Le arquivo db.bin e cada arquivo de texto correspondente à matrícula
+	setlocale(LC_CTYPE, "Portuguese");
 
-	// Leitura dos dados da academia atual
+	// Le arquivo db.bin e cada arquivo de texto correspondente à matrícula
+	printf("<LENDO CREDENCIAIS DA ACADEMIA...>\n");
+	if (!carregaTudo(&academia)) {
+		// Leitura dos dados da academia atual
+		printf("<INSIRA 0 PARA PULAR UM PASSO>\n");
+		printf("Nome da academia: ");
+		fgets(academia.nome, TAMANHO_NOME, stdin);
+		util_removeQuebraLinhaFinal(academia.nome);
+
+		printf("CNPJ: ");
+		scanf("%llu%c", &academia.CNPJ, &lixo);
+
+		printf("Onde se encontra a academia? ");
+		fgets(academia.endereco, TAMANHO_ENDERECO, stdin);
+		util_removeQuebraLinhaFinal(academia.endereco);
+
+		printf("E-mail de atendimento: ");
+		fgets(academia.email, TAMANHO_EMAIL, stdin);
+		util_removeQuebraLinhaFinal(academia.email);
+
+		printf("Telefone de atendimento: ");
+		scanf("%llu%c", &academia.telefone, &lixo);
+	}
 
 	// Leitura dos usuários da academia
 	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas+1));
