@@ -65,22 +65,93 @@ typedef struct academia_estrutura {
 } academia_t;
 
 // Funções
-bool carregaTudo(academia_t* academia) {
+uint8_t carregaExercicios(exercicio_t** exercicios, FILE* arquivo, long* cursor) {
+	return 1;
+	
+	return 0;
+}
+
+uint8_t carregaTreinos(exercicio_t** exercicios, treino_t** treinos, FILE* arquivo, long* cursor) {
+	// Treino A, B, C... Z
+	return carregaExercicios(exercicios, arquivo, cursor) + 1;
+	
+	return false;
+}
+
+uint8_t carregaUsuarios(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, FILE* arquivo, long* cursor) {
+	
+	while (!feof(arquivo)) {
+		// fscanf
+		return carregaTreinos(exercicios, treinos, arquivo, cursor) + 1;
+	}
+	return false;
+}
+
+bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, academia_t* academia) {
 	FILE* arquivo;
 	int i = 1;
+	long cursor = 0;
+	char nome[TAMANHO_NOME];
+	char str1[sizeof(unsigned long long) + 1];
+	char str2[] = ".txt";
+	uint8_t status_carregamento = 0;
 
 	arquivo = fopen("db.bin", "rb");
+
 	if (arquivo) {
+		fseek(arquivo, 0, SEEK_SET);
+
 		while (!feof(arquivo)) {
-			// fread
-			printf("Academia %i: %s;", i, academia->nome);
+			fread(nome, sizeof(char), TAMANHO_NOME, arquivo);
+			printf("Academia %i: %s;", i, nome);
 			i++;
 		}
 		printf("Deseja entrar em qual das academias registradas? ");
 		scanf("%i", &i);
-		// fseek + fread
+		if (!i) return false;
+
+		fseek(arquivo, (i-- * sizeof(academia_t)), SEEK_SET);
+		fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
+		fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
+		fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
+		fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
+		fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
 
 		fclose(arquivo);
+		
+		// academia.txt
+		util_converteInteiroParaTexto((int)academia->CNPJ, str1);
+		strcpy(nome, str1);
+		strncat(nome, str2, 4);
+		arquivo = fopen(nome, "r");
+
+		if (arquivo) {
+			status_carregamento += carregaUsuarios(exercicios, treinos, usuarios, arquivo, &cursor);
+			
+			switch (status_carregamento) {
+			case 0:
+				break;
+			case 1:
+				usuarios_section:
+				printf("<Usuarios encontrados!>\n");
+				break;
+			case 2:
+				treinos_section:
+				printf("<Treinos encontrados!>\n");
+				goto usuarios_section;
+				break;
+			case 3:
+				printf("<Exercicios encontrados!>\n");
+				goto treinos_section;
+				break;
+			default:
+				fprintf(stderr, "<Erro desconhecido.>\n");
+				break;
+			}
+
+			fclose(arquivo);
+		}
+		
 		return true;
 	}
 	return false;
@@ -94,13 +165,19 @@ int main(int argc, char** argv) {
 	char lixo;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
+	treino_t* treinos = NULL;
+	exercicio_t* exercicios = NULL;
 	int nMatriculas = 0;
 
 	setlocale(LC_CTYPE, "Portuguese");
 
 	// Le arquivo db.bin e cada arquivo de texto correspondente à matrícula
 	printf("<LENDO CREDENCIAIS DA ACADEMIA...>\n");
-	if (!carregaTudo(&academia)) {
+	exercicios = (exercicio_t*)realloc(exercicios, sizeof(exercicio_t));
+	treinos = (treino_t*)realloc(treinos, sizeof(treino_t));
+	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
+
+	if (!carregaAcad(&exercicios, &treinos, &usuarios, &academia)) {
 		// Leitura dos dados da academia atual
 		printf("<INSIRA 0 PARA PULAR UM PASSO>\n");
 		printf("Nome da academia: ");
@@ -123,9 +200,7 @@ int main(int argc, char** argv) {
 	}
 
 	// Leitura dos usuários da academia
-	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas+1));
-
-
+	
 	// salvamento em arquivo <db.bin>
 
 	return SUCESSO;
