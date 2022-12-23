@@ -8,6 +8,10 @@
 
 // Funcoes
 /* ---------- UTILIDADES ------------------------------ */
+void util_converteInteiroParaTexto(int numero, char texto[]) {
+	sprintf(texto, "%d", numero);
+}
+
 void util_imprimeTracinhos(int nTracinhos) {
 
 	int i;
