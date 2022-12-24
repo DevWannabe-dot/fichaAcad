@@ -26,6 +26,8 @@
 #define TAMANHO_ENDERECO	(100+1)
 #define TAMANHO_EMAIL		(50+1)
 #define TAMANHO_ALONGAR		(50+1)
+#define NUM_TREINOS_MAX		(26)
+
 
 // Tipos
 typedef struct exercicio_estrutura {
@@ -50,9 +52,9 @@ typedef struct treino_estrutura {
 } treino_t;
 
 typedef struct usuario_estrutura {
-	unsigned matricula;				// Matrícula do usuário, até 4294967295
-	char nome[TAMANHO_NOME];		// Nome completo do usuário
-	int* TreinosPorIDs;				// Ponteiro para a struct treinos
+	unsigned matricula;					// Matrícula do usuário, até 4294967295
+	char nome[TAMANHO_NOME];			// Nome completo do usuário
+	int TreinosPorIDs[NUM_TREINOS_MAX];	// Ponteiro para a struct treinos
 	// sem variável auxiliar nTreinos, irá de 0 até 25 (A a Z) conferindo if(usuario[i]) antes de executar a iteração
 } usuario_t;
 
@@ -66,6 +68,15 @@ typedef struct academia_estrutura {
 } academia_t;
 
 // Funções
+void criarNomeArquivo(academia_t* academia, char nome[]) {
+	char str1[sizeof(unsigned long long) + 1];
+	char str2[] = ".txt";
+
+	util_converteInteiroParaTexto((int)academia->CNPJ, str1);
+	strcpy(nome, str1);
+	strncat(nome, str2, 4);
+}
+
 uint8_t carregaExercicios(exercicio_t** exercicios, FILE* arquivo, long* cursor) {
 	return 1;
 	
@@ -79,27 +90,21 @@ uint8_t carregaTreinos(exercicio_t** exercicios, treino_t** treinos, FILE* arqui
 	return false;
 }
 
-uint8_t carregaUsuarios(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, FILE* arquivo, long* cursor) {
+uint8_t carregaUsuarios(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
 	
 	while (!feof(arquivo)) {
-		// fscanf
+		fseek(arquivo, 0, SEEK_SET);
+		fscanf(arquivo, "%i", nMatriculas);
+		*cursor = ftell(arquivo);
 		return carregaTreinos(exercicios, treinos, arquivo, cursor) + 1;
+		
 	}
+
 	return false;
 }
 
-void criarNomeArquivo(academia_t* academia, char nome[]) {
-	char str1[sizeof(unsigned long long) + 1];
-	char str2[] = ".txt";
-
-	util_converteInteiroParaTexto((int)academia->CNPJ, str1);
-	strcpy(nome, str1);
-	strncat(nome, str2, 4);
-}
-
-bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, academia_t* academia) {
+uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, academia_t* academia, int* nMatriculas) {
 	FILE* arquivo;
-	int i = 1;
 	long cursor = 0;
 	char nome[TAMANHO_NOME];
 	
@@ -108,15 +113,18 @@ bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuar
 	arquivo = fopen("db.bin", "rb");
 
 	if (arquivo) {
+		status_carregamento++;
 		fseek(arquivo, 0, SEEK_SET);
 
+		// loop mantido apenas para evitar ler um arquivo vazio
 		while (!feof(arquivo)) {
 			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
-			printf("Academia: %s...", academia->nome);
+			printf("Academia: %s...\n", academia->nome);
 			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
 			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
 			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
 			fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
+			break;
 		}	
 
 		fclose(arquivo);
@@ -126,7 +134,7 @@ bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuar
 		arquivo = fopen(nome, "r");
 
 		if (arquivo) {
-			status_carregamento += carregaUsuarios(exercicios, treinos, usuarios, arquivo, &cursor);
+			status_carregamento += carregaUsuarios(exercicios, treinos, usuarios, nMatriculas, arquivo, &cursor);
 			
 			switch (status_carregamento) {
 			case 0:
@@ -151,14 +159,58 @@ bool carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuar
 
 			fclose(arquivo);
 		}
-		
-		return true;
 	}
-	return false;
+	return status_carregamento;
 }
 
-void listaMatriculas(void) {
+void imprimeUsuarioUnico(usuario_t* usuarioAtual) {
+	printf("%u: %s", usuarioAtual->matricula, usuarioAtual->nome);
+}
+
+void listaMatriculas(usuario_t* usuarios, int nMatriculas) {
+	for (int i = 0; i < nMatriculas; i++) {
+		imprimeUsuarioUnico(&usuarios[i]);
+	}
+}
+
+void atribuirTreino(usuario_t* usuarioAtual, treino_t* treinos) {
+	char lixo;
+	int escolha, i;
+
+	// listar treinos
+	printf("Qual treino da lista deseja adicionar (0 PARA INTERROMPER)? ");
+	scanf("%i%c", &escolha, &lixo);
+
+	for(i = 0; i < NUM_TREINOS_MAX; i++) {
+		if (usuarioAtual->TreinosPorIDs[i] == 0) {
+			usuarioAtual->TreinosPorIDs[i] = escolha;
+			break;
+		}
+	}
+}
+
+void cadastrarUsuarios(usuario_t* usuarioAtual, treino_t* treinos){
+	char escolha, lixo;
 	
+	printf("Matrícula do usuário: ");
+	scanf("%u%c", &usuarioAtual->matricula, &lixo);	
+	
+	printf("Nome do usuário: ");
+	fgets(usuarioAtual->nome, TAMANHO_NOME, stdin);
+	util_removeQuebraLinhaFinal(usuarioAtual->nome);
+
+	memset(usuarioAtual->TreinosPorIDs, 0, NUM_TREINOS_MAX*sizeof(int));
+	printf("Deseja atribuir treinos a este usuário (S/N)?");
+	scanf("%c%c", &escolha, &lixo);
+
+	switch (escolha) {
+	case 'S':
+	case 's':
+		atribuirTreino(usuarioAtual, treinos);
+		break;
+	default:
+		break;
+	}
 }
 
 void salvaTudo(exercicio_t* exercicios, treino_t* treinos, usuario_t* usuarios, academia_t academia) {
@@ -181,13 +233,13 @@ void salvaTudo(exercicio_t* exercicios, treino_t* treinos, usuario_t* usuarios, 
 }
 
 int main(int argc, char** argv) {
-	char lixo;
+	char lixo, backup[TAMANHO_ENDERECO], escolha;
+	int nMatriculas = 0, opcao = 0;
+	uint8_t status_carregamento;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
 	treino_t* treinos = NULL;
 	exercicio_t* exercicios = NULL;
-	int nMatriculas = 0;
-	char backup[TAMANHO_ENDERECO];
 
 	setlocale(LC_CTYPE, "Portuguese");
 
@@ -197,8 +249,9 @@ int main(int argc, char** argv) {
 	treinos = (treino_t*)realloc(treinos, sizeof(treino_t));
 	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 
-	if (!carregaAcad(&exercicios, &treinos, &usuarios, &academia)) {
-		// Leitura dos dados da academia atual
+	// Leitura dos dados da academia atual
+	status_carregamento = carregaAcad(&exercicios, &treinos, &usuarios, &academia, &nMatriculas);
+	if (!status_carregamento) {
 		memset(academia.nome, '\0', TAMANHO_NOME);
 		academia.CNPJ = 0;
 		memset(academia.endereco, '\0', TAMANHO_ENDERECO);
@@ -238,7 +291,55 @@ int main(int argc, char** argv) {
 	}
 
 	// Leitura dos usuários da academia
-	
+	do {
+		util_imprimeTracinhos(20);
+		printf("\nACADEMIA %s\n", academia.nome);
+		printf("0 - SAIR\n"
+			"1 - Listar matrículas\n"
+			"2 - Acessar usuário (matrícula)\n"
+			"3 - Procurar matrícula (nome)\n"
+			"4 - ADMIN\n"); // criar senha caso não exista, irá em db.bin
+		// daí em diante, criar novo usuário e atribuir treinos
+		util_imprimeTracinhos(5);
+		printf(">> ");
+		
+		
+		scanf("%i%c", &opcao, &lixo);
+
+		switch (opcao) {
+		case 0:
+			// sair
+			break;
+		case 1:
+			if (nMatriculas) {
+				listaMatriculas(usuarios, nMatriculas);
+			}
+			else {
+				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
+				scanf("%c%c", &escolha, &lixo);
+				switch (escolha) {
+				case 'S':
+				case 's':
+					usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t*) * (nMatriculas + 1));
+					cadastrarUsuarios(&usuarios[nMatriculas], treinos);
+					nMatriculas++;
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		case 2:
+			if (status_carregamento > 1) {
+				// código aqui
+			} else if (status_carregamento < 1) fprintf(stderr, "<Não há usuários na sua academia. Deseja cadastrar?>\n");
+			break;
+		default:
+			fprintf(stderr, "<Erro na leitura da opção.>\n");
+			break;
+		}
+	} while (opcao);
+
 	// salvamento em arquivo <db.bin>
 	salvaTudo(exercicios, treinos, usuarios, academia);
 
