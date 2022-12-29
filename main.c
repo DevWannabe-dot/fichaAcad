@@ -86,19 +86,17 @@ int main(int argc, char** argv) {
 	academia_t academia;
 	usuario_t* usuarios = NULL;
 	treino_t* treinos = NULL;
-	exercicio_t* exercicios = NULL;
 	bool privilegiosAdmin = false;
 
 	setlocale(LC_CTYPE, "Portuguese");
 
 	// Le arquivo db.bin e cada arquivo de texto correspondente à matrícula
 	printf("<LENDO CREDENCIAIS DA ACADEMIA...>\n");
-	exercicios = (exercicio_t*)realloc(exercicios, sizeof(exercicio_t));
 	treinos = (treino_t*)realloc(treinos, sizeof(treino_t));
 	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 
 	// Leitura dos dados da academia atual
-	status_carregamento = carregaAcad(&exercicios, &treinos, &usuarios, &academia, &nMatriculas);
+	status_carregamento = carregaAcad(&treinos, &usuarios, &academia, &nMatriculas);
 	if (!status_carregamento) {
 		memset(academia.nome, '\0', TAMANHO_NOME);
 		academia.CNPJ = 0;
@@ -220,7 +218,7 @@ int main(int argc, char** argv) {
 	} while (opcao);
 
 	// salvamento em arquivo <db.bin>
-	salvaTudo(exercicios, treinos, usuarios, academia);
+	salvaTudo(treinos, usuarios, academia);
 
 	return SUCESSO;
 }

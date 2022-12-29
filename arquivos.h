@@ -24,33 +24,27 @@ void criarNomeArquivo(academia_t* academia, char nome[]) {
 	strncat(nome, str2, 4);
 }
 
-uint8_t carregaExercicios(exercicio_t** exercicios, FILE* arquivo, long* cursor) {
-	return 1;
-
-	return 0;
-}
-
-uint8_t carregaTreinos(exercicio_t** exercicios, treino_t** treinos, FILE* arquivo, long* cursor) {
+uint8_t carregaTreinos(treino_t** treinos, FILE* arquivo, long* cursor) {
 	// Treino A, B, C... Z
-	return carregaExercicios(exercicios, arquivo, cursor) + 1;
+	return 1;
 
 	return false;
 }
 
-uint8_t carregaUsuarios(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
+uint8_t carregaUsuarios(treino_t** treinos, usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
 
 	while (!feof(arquivo)) {
 		fseek(arquivo, 0, SEEK_SET);
 		fscanf(arquivo, "%i", nMatriculas);
 		*cursor = ftell(arquivo);
-		return carregaTreinos(exercicios, treinos, arquivo, cursor) + 1;
+		return carregaTreinos(treinos, arquivo, cursor) + 1;
 
 	}
 
 	return false;
 }
 
-uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** usuarios, academia_t* academia, int* nMatriculas) {
+uint8_t carregaAcad(treino_t** treinos, usuario_t** usuarios, academia_t* academia, int* nMatriculas) {
 	FILE* arquivo;
 	long cursor = 0;
 	char nome[TAMANHO_NOME];
@@ -65,7 +59,7 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 		// loop mantido apenas para evitar ler um arquivo vazio
 		while (!feof(arquivo)) {
 			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
-			printf("Academia: %s...\n", academia->nome);
+			printf("Academia: %s...\n\n", academia->nome);
 			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
 			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
 			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
@@ -81,7 +75,7 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 
 		if (arquivo) {
 			status_carregamento++;
-			status_carregamento += carregaUsuarios(exercicios, treinos, usuarios, nMatriculas, arquivo, &cursor);
+			status_carregamento += carregaUsuarios(treinos, usuarios, nMatriculas, arquivo, &cursor);
 
 			switch (status_carregamento) {
 			case 0:
@@ -100,10 +94,6 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 				printf("<Treinos encontrados!>\n");
 				goto usuarios_section;
 				break;
-			case 4:
-				printf("<Exercicios encontrados!>\n");
-				goto treinos_section;
-				break;
 			default:
 				fprintf(stderr, "<Erro desconhecido.>\n");
 				break;
@@ -115,7 +105,7 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 	return status_carregamento;
 }
 
-void salvaTudo(exercicio_t* exercicios, treino_t* treinos, usuario_t* usuarios, academia_t academia) {
+void salvaTudo(treino_t* treinos, usuario_t* usuarios, academia_t academia) {
 	FILE* arquivo = fopen("db.bin", "wb");
 	char nome[TAMANHO_NOME];
 
