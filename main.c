@@ -29,14 +29,13 @@
 // Funções
 
 void imprimeUsuarioUnico(usuario_t* usuarioAtual) {
-	printf("%u: %s", usuarioAtual->matricula, usuarioAtual->nome);
+	printf("%u: %s\n", usuarioAtual->matricula, usuarioAtual->nome);
 }
 
 void listaMatriculas(usuario_t* usuarios, int nMatriculas) {
 	for (int i = 0; i < nMatriculas; i++) {
 		imprimeUsuarioUnico(&usuarios[i]);
 	}
-	puts(""); // quebra de linha
 }
 
 void atribuirTreino(usuario_t* usuarioAtual, treino_t* treinos) {
@@ -171,7 +170,7 @@ int main(int argc, char** argv) {
 					switch (escolha) {
 						case 'S':
 						case 's':
-							usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t*) * (nMatriculas + 1));
+							usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 							cadastrarUsuarios(&usuarios[nMatriculas], treinos);
 							nMatriculas++;
 						break;
@@ -194,12 +193,11 @@ int main(int argc, char** argv) {
 			if (privilegiosAdmin) fprintf(stderr, "<Admin ativado!>\n");
 			break;
 		case 5:
-			usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t*) * (nMatriculas + 1));
+			usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 			cadastrarUsuarios(&usuarios[nMatriculas], treinos);
 			nMatriculas++;
 			break;
 		case 6:
-			if (!status_carregamento) break;
 			util_imprimeTracinhos(5);
 			printf(" DADOS ATUAIS ");
 			util_imprimeTracinhos(5);
