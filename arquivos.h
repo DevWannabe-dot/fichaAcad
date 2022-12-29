@@ -65,7 +65,7 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 		// loop mantido apenas para evitar ler um arquivo vazio
 		while (!feof(arquivo)) {
 			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
-			printf("Academia: %s...\n", academia->nome);
+			printf("Academia: %s...\n\n", academia->nome);
 			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
 			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
 			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
@@ -116,22 +116,24 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 }
 
 void salvaTudo(exercicio_t* exercicios, treino_t* treinos, usuario_t* usuarios, academia_t academia) {
-	FILE* arquivo = fopen("db.bin", "wb");
+	FILE* arquivo_s;
 	char nome[TAMANHO_NOME];
 
-	if (arquivo) {
-		fseek(arquivo, 0, SEEK_SET);
+	arquivo_s = fopen("db.bin", "wb");
 
-		fwrite(&academia.nome, sizeof(char), TAMANHO_NOME, arquivo);
-		fwrite(&academia.CNPJ, sizeof(unsigned long long), 1, arquivo);
-		fwrite(&academia.endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
-		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo);
-		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo);
+	if (arquivo_s) {
+		fseek(arquivo_s, 0, SEEK_SET);
 
-		fclose(arquivo);
+		fwrite(&academia.nome, sizeof(char), TAMANHO_NOME, arquivo_s);
+		fwrite(&academia.CNPJ, sizeof(unsigned long long), 1, arquivo_s);
+		fwrite(&academia.endereco, sizeof(char), TAMANHO_ENDERECO, arquivo_s);
+		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo_s);
+		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo_s);
+
+		fclose(arquivo_s);
 	}
 	criarNomeArquivo(&academia, nome);
-	arquivo = fopen(nome, "w");
+	arquivo_s = fopen(nome, "w");
 }
 
 #endif

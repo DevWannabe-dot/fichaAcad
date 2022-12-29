@@ -36,6 +36,7 @@ void listaMatriculas(usuario_t* usuarios, int nMatriculas) {
 	for (int i = 0; i < nMatriculas; i++) {
 		imprimeUsuarioUnico(&usuarios[i]);
 	}
+	puts(""); // quebra de linha
 }
 
 void atribuirTreino(usuario_t* usuarioAtual, treino_t* treinos) {
@@ -86,6 +87,7 @@ int main(int argc, char** argv) {
 	usuario_t* usuarios = NULL;
 	treino_t* treinos = NULL;
 	exercicio_t* exercicios = NULL;
+	bool privilegiosAdmin = false;
 
 	setlocale(LC_CTYPE, "Portuguese");
 
@@ -146,6 +148,10 @@ int main(int argc, char** argv) {
 			"3 - Procurar matrícula (nome)\n"
 			"4 - ADMIN\n"); // criar senha caso não exista, irá em db.bin
 		// daí em diante, criar novo usuário e atribuir treinos
+		if (privilegiosAdmin) {
+			printf("5 - Cadastrar usuário\n"
+					"6 - Editar academia\n");
+		}
 		util_imprimeTracinhos(5);
 		printf(">> ");
 		
@@ -161,17 +167,19 @@ int main(int argc, char** argv) {
 				listaMatriculas(usuarios, nMatriculas);
 			}
 			else {
-				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
-				scanf("%c%c", &escolha, &lixo);
-				switch (escolha) {
-				case 'S':
-				case 's':
-					usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t*) * (nMatriculas + 1));
-					cadastrarUsuarios(&usuarios[nMatriculas], treinos);
-					nMatriculas++;
-					break;
-				default:
-					break;
+				if (privilegiosAdmin) {
+					fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
+					scanf("%c%c", &escolha, &lixo);
+					switch (escolha) {
+						case 'S':
+						case 's':
+							usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t*) * (nMatriculas + 1));
+							cadastrarUsuarios(&usuarios[nMatriculas], treinos);
+							nMatriculas++;
+						break;
+						default:
+						break;
+					}
 				}
 			}
 			break;
@@ -184,30 +192,26 @@ int main(int argc, char** argv) {
 			// procurar matricula por parte do nome
 			break;
 		case 4:
-			printf("0 - VOLTAR\n"
-					"1 - Editar dados da academia\n>> ");
-			scanf("%i%c", &opcao, &lixo);
-			switch (opcao) {
-			case 0:
-				opcao = -1;
-				break;
-			case 1:
-				if (!status_carregamento) break;
-				util_imprimeTracinhos(5);
-				printf(" DADOS ATUAIS ");
-				util_imprimeTracinhos(5);
-				printf("\n"
-						"Nome		%s\n"
-						"CNPJ		%llu\n"
-						"Endereço	%s\n"
-						"E-mail		%s\n"
-						"Telefone	%llu\n", academia.nome, academia.CNPJ, academia.endereco, academia.email, academia.telefone);
-				// editar
-				break;
-			default:
-				fprintf(stderr, "<Erro na leitura da opção.>\n");
-				break;
-			}
+			privilegiosAdmin = true;
+			if (privilegiosAdmin) fprintf(stderr, "<Admin ativado!>\n");
+			break;
+		case 5:
+			usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t*) * (nMatriculas + 1));
+			cadastrarUsuarios(&usuarios[nMatriculas], treinos);
+			nMatriculas++;
+			break;
+		case 6:
+			if (!status_carregamento) break;
+			util_imprimeTracinhos(5);
+			printf(" DADOS ATUAIS ");
+			util_imprimeTracinhos(5);
+			printf("\n"
+				"Nome		%s\n"
+				"CNPJ		%llu\n"
+				"Endereço	%s\n"
+				"E-mail		%s\n"
+				"Telefone	%llu\n", academia.nome, academia.CNPJ, academia.endereco, academia.email, academia.telefone);
+			// editar
 			break;
 		default:
 			fprintf(stderr, "<Erro na leitura da opção.>\n");
