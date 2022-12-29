@@ -60,7 +60,6 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 	arquivo = fopen("db.bin", "rb");
 
 	if (arquivo) {
-		status_carregamento++;
 		fseek(arquivo, 0, SEEK_SET);
 
 		// loop mantido apenas para evitar ler um arquivo vazio
@@ -81,21 +80,27 @@ uint8_t carregaAcad(exercicio_t** exercicios, treino_t** treinos, usuario_t** us
 		arquivo = fopen(nome, "r");
 
 		if (arquivo) {
+			status_carregamento++;
 			status_carregamento += carregaUsuarios(exercicios, treinos, usuarios, nMatriculas, arquivo, &cursor);
 
 			switch (status_carregamento) {
 			case 0:
 				break;
 			case 1:
-			usuarios_section:
-				printf("<Usuarios encontrados!>\n");
+			academia_section:
+				printf("<Academia encontrada!>\n");
 				break;
 			case 2:
+			usuarios_section:
+				printf("<Usuarios encontrados!>\n");
+				goto academia_section;
+				break;
+			case 3:
 			treinos_section:
 				printf("<Treinos encontrados!>\n");
 				goto usuarios_section;
 				break;
-			case 3:
+			case 4:
 				printf("<Exercicios encontrados!>\n");
 				goto treinos_section;
 				break;
