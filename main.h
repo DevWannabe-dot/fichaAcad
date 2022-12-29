@@ -23,7 +23,7 @@ typedef struct exercicio_estrutura {
 
 typedef struct treino_estrutura {
 	// Criado para possibilitar adicionar várias práticas já cadastradas ao treino
-	exercicio_t* exercicios;
+	exercicio_t* exercicios;		// acessar com operador * e escrever diretamente no arquivo
 	unsigned nExer;					// número de práticas para viabilizar a alocação dinâmica
 	char alongar[TAMANHO_ALONGAR];	// ex. panturrilhas, lombar
 	// O treino desejado é referenciado por um char identificador = 65 (A)...
