@@ -180,6 +180,35 @@ int main(int argc, char** argv) {
 				// código aqui
 			} else if (status_carregamento < 1) fprintf(stderr, "<Não há usuários na sua academia. Deseja cadastrar?>\n");
 			break;
+		case 3:
+			// procurar matricula por parte do nome
+			break;
+		case 4:
+			printf("0 - VOLTAR\n"
+					"1 - Editar dados da academia\n>> ");
+			scanf("%i%c", &opcao, &lixo);
+			switch (opcao) {
+			case 0:
+				opcao = -1;
+				break;
+			case 1:
+				if (!status_carregamento) break;
+				util_imprimeTracinhos(5);
+				printf(" DADOS ATUAIS ");
+				util_imprimeTracinhos(5);
+				printf("\n"
+						"Nome		%s\n"
+						"CNPJ		%llu\n"
+						"Endereço	%s\n"
+						"E-mail		%s\n"
+						"Telefone	%llu\n", academia.nome, academia.CNPJ, academia.endereco, academia.email, academia.telefone);
+				// editar
+				break;
+			default:
+				fprintf(stderr, "<Erro na leitura da opção.>\n");
+				break;
+			}
+			break;
 		default:
 			fprintf(stderr, "<Erro na leitura da opção.>\n");
 			break;
