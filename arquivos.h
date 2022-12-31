@@ -24,27 +24,19 @@ void criarNomeArquivo(academia_t* academia, char nome[]) {
 	strncat(nome, str2, 4);
 }
 
-uint8_t carregaTreinos(treino_t** treinos, FILE* arquivo, long* cursor) {
-	// Treino A, B, C... Z
-	return 1;
-
-	return false;
-}
-
-uint8_t carregaUsuarios(treino_t** treinos, usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
+uint8_t carregaUsuarios(usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
 
 	while (!feof(arquivo)) {
 		fseek(arquivo, 0, SEEK_SET);
 		fscanf(arquivo, "%i", nMatriculas);
 		*cursor = ftell(arquivo);
-		return carregaTreinos(treinos, arquivo, cursor) + 1;
-
+		return 1;
 	}
 
 	return false;
 }
 
-uint8_t carregaAcad(treino_t** treinos, usuario_t** usuarios, academia_t* academia, int* nMatriculas) {
+uint8_t carregaAcad(usuario_t** usuarios, academia_t* academia, int* nMatriculas) {
 	FILE* arquivo;
 	long cursor = 0;
 	char nome[TAMANHO_NOME];
@@ -75,7 +67,7 @@ uint8_t carregaAcad(treino_t** treinos, usuario_t** usuarios, academia_t* academ
 
 		if (arquivo) {
 			status_carregamento++;
-			status_carregamento += carregaUsuarios(treinos, usuarios, nMatriculas, arquivo, &cursor);
+			status_carregamento += carregaUsuarios(usuarios, nMatriculas, arquivo, &cursor);
 
 			switch (status_carregamento) {
 			case 0:
@@ -85,14 +77,8 @@ uint8_t carregaAcad(treino_t** treinos, usuario_t** usuarios, academia_t* academ
 				printf("<Academia encontrada!>\n");
 				break;
 			case 2:
-			usuarios_section:
 				printf("<Usuarios encontrados!>\n");
 				goto academia_section;
-				break;
-			case 3:
-			treinos_section:
-				printf("<Treinos encontrados!>\n");
-				goto usuarios_section;
 				break;
 			default:
 				fprintf(stderr, "<Erro desconhecido.>\n");
@@ -105,7 +91,7 @@ uint8_t carregaAcad(treino_t** treinos, usuario_t** usuarios, academia_t* academ
 	return status_carregamento;
 }
 
-void salvaTudo(treino_t* treinos, usuario_t* usuarios, academia_t academia) {
+void salvaTudo(usuario_t* usuarios, academia_t academia) {
 	FILE* arquivo = fopen("db.bin", "wb");
 	char nome[TAMANHO_NOME];
 

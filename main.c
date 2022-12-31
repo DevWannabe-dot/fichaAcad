@@ -38,23 +38,17 @@ void listaMatriculas(usuario_t* usuarios, int nMatriculas) {
 	}
 }
 
-void atribuirTreino(usuario_t* usuarioAtual, treino_t* treinos) {
+void atribuirTreino(usuario_t* usuarioAtual) {
 	char lixo;
-	int escolha, i;
+	int escolha, nTreinos = 0;
 
 	// listar treinos
+
 	printf("Qual treino da lista deseja adicionar (0 PARA INTERROMPER)? ");
 	scanf("%i%c", &escolha, &lixo);
-
-	for(i = 0; i < NUM_TREINOS_MAX; i++) {
-		if (usuarioAtual->TreinosPorIDs[i] == 0) {
-			usuarioAtual->TreinosPorIDs[i] = escolha;
-			break;
-		}
-	}
 }
 
-void cadastrarUsuarios(usuario_t* usuarioAtual, treino_t* treinos){
+void cadastrarUsuarios(usuario_t* usuarioAtual){
 	char escolha, lixo;
 	
 	printf("Matrícula do usuário: ");
@@ -64,14 +58,13 @@ void cadastrarUsuarios(usuario_t* usuarioAtual, treino_t* treinos){
 	fgets(usuarioAtual->nome, TAMANHO_NOME, stdin);
 	util_removeQuebraLinhaFinal(usuarioAtual->nome);
 
-	memset(usuarioAtual->TreinosPorIDs, 0, NUM_TREINOS_MAX*sizeof(int));
 	printf("Deseja atribuir treinos a este usuário (S/N)?");
 	scanf("%c%c", &escolha, &lixo);
 
 	switch (escolha) {
 	case 'S':
 	case 's':
-		atribuirTreino(usuarioAtual, treinos);
+		atribuirTreino(usuarioAtual);
 		break;
 	default:
 		break;
@@ -84,18 +77,16 @@ int main(int argc, char** argv) {
 	uint8_t status_carregamento;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
-	treino_t* treinos = NULL;
 	bool privilegiosAdmin = false;
 
 	setlocale(LC_CTYPE, "Portuguese");
 
 	// Le arquivo db.bin e cada arquivo de texto correspondente à matrícula
 	printf("<LENDO CREDENCIAIS DA ACADEMIA...>\n");
-	treinos = (treino_t*)realloc(treinos, sizeof(treino_t));
 	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 
 	// Leitura dos dados da academia atual
-	status_carregamento = carregaAcad(&treinos, &usuarios, &academia, &nMatriculas);
+	status_carregamento = carregaAcad(&usuarios, &academia, &nMatriculas);
 	if (!status_carregamento) {
 		memset(academia.nome, '\0', TAMANHO_NOME);
 		academia.CNPJ = 0;
@@ -171,7 +162,7 @@ int main(int argc, char** argv) {
 						case 'S':
 						case 's':
 							usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
-							cadastrarUsuarios(&usuarios[nMatriculas], treinos);
+							cadastrarUsuarios(&usuarios[nMatriculas]);
 							nMatriculas++;
 						break;
 						default:
@@ -194,7 +185,7 @@ int main(int argc, char** argv) {
 			break;
 		case 5:
 			usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
-			cadastrarUsuarios(&usuarios[nMatriculas], treinos);
+			cadastrarUsuarios(&usuarios[nMatriculas]);
 			nMatriculas++;
 			break;
 		case 6:
@@ -216,7 +207,7 @@ int main(int argc, char** argv) {
 	} while (opcao);
 
 	// salvamento em arquivo <db.bin>
-	salvaTudo(treinos, usuarios, academia);
+	salvaTudo(usuarios, academia);
 
 	return SUCESSO;
 }

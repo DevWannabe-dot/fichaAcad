@@ -38,7 +38,7 @@ typedef struct treino_estrutura {
 typedef struct usuario_estrutura {
 	unsigned matricula;					// Matrícula do usuário, até 4294967295
 	char nome[TAMANHO_NOME];			// Nome completo do usuário
-	int TreinosPorIDs[NUM_TREINOS_MAX];	// Ponteiro para a struct treinos
+	treino_t treinos[NUM_TREINOS_MAX];				// Ponteiro para a struct treinos
 	// sem variável auxiliar nTreinos, irá de 0 até 25 (A a Z) conferindo if(usuario[i]) antes de executar a iteração
 } usuario_t;
 
