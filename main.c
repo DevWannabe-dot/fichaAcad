@@ -50,9 +50,11 @@ void atribuirTreino(usuario_t* usuarioAtual) {
 
 void cadastrarUsuarios(usuario_t* usuarioAtual){
 	char escolha, lixo;
+	usuarioAtual->matricula = 0;
 	
-	printf("Matrícula do usuário: ");
+	printf("(0 PARA INTERROMPER)\nMatrícula do usuário: ");
 	scanf("%u%c", &usuarioAtual->matricula, &lixo);	
+	if (usuarioAtual->matricula == 0) return;
 	
 	printf("Nome do usuário: ");
 	fgets(usuarioAtual->nome, TAMANHO_NOME, stdin);

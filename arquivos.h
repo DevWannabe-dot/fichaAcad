@@ -92,6 +92,7 @@ uint8_t carregaAcad(usuario_t** usuarios, academia_t* academia, int* nMatriculas
 }
 
 void salvaTudo(usuario_t* usuarios, academia_t academia) {
+	int i = 0;
 	FILE* arquivo = fopen("db.bin", "wb");
 	char nome[TAMANHO_NOME];
 
@@ -103,6 +104,13 @@ void salvaTudo(usuario_t* usuarios, academia_t academia) {
 		fwrite(&academia.endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
 		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo);
 		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo);
+
+		// Matriculas (nome)
+		while (usuarios[i].matricula) {
+			fwrite(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
+			fwrite(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
+			i++;
+		}
 
 		fclose(arquivo);
 	}
