@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <locale.h>
 #include <time.h>
+#include <math.h>
 #include "util.h"
 #include "main.h"
 #include "arquivos.h"
@@ -27,7 +28,6 @@
 // Tipos
 
 // Funções
-
 void imprimeUsuarioUnico(usuario_t* usuarioAtual) {
 	printf("%u: %s\n", usuarioAtual->matricula, usuarioAtual->nome);
 }
@@ -38,23 +38,27 @@ void listaMatriculas(usuario_t* usuarios, int nMatriculas) {
 	}
 }
 
-void atribuirTreino(usuario_t* usuarioAtual) {
-	char lixo;
+void atribuirTreino(academia_t* academia, usuario_t* usuarioAtual) {
+	char lixo, nome_arquivo[POW_2_32_CARACTERES];
 	int escolha, nTreinos = 0;
+	FILE* arquivo_usuario;
 
-	// listar treinos
-
-	printf("Qual treino da lista deseja adicionar (0 PARA INTERROMPER)? ");
-	scanf("%i%c", &escolha, &lixo);
+	criarNomeArquivo(academia, nome_arquivo, POW_2_32_CARACTERES, usuarioAtual->matricula);
+	arquivo_usuario = fopen(nome_arquivo, "w");
+	// listar treinos cadastrados ou vazios (A-Z)
+	
+	printf("\nQual treino deseja editar? ");
+	scanf("%d%c", &escolha, &lixo);
 }
 
-void cadastrarUsuarios(usuario_t* usuarioAtual){
+int cadastrarUsuarios(academia_t academia, usuario_t* usuarioAtual){
 	char escolha, lixo;
 	usuarioAtual->matricula = 0;
-	
+	memset(usuarioAtual->nome, '\0', TAMANHO_NOME);
+
 	printf("(0 PARA INTERROMPER)\nMatrícula do usuário: ");
 	scanf("%u%c", &usuarioAtual->matricula, &lixo);	
-	if (usuarioAtual->matricula == 0) return;
+	if (usuarioAtual->matricula == 0) return ERRO_CADASTRO;
 	
 	printf("Nome do usuário: ");
 	fgets(usuarioAtual->nome, TAMANHO_NOME, stdin);
@@ -66,11 +70,13 @@ void cadastrarUsuarios(usuario_t* usuarioAtual){
 	switch (escolha) {
 	case 'S':
 	case 's':
-		atribuirTreino(usuarioAtual);
+		atribuirTreino(&academia, usuarioAtual);
 		break;
 	default:
 		break;
 	}
+
+	return CADASTRO_OK;
 }
 
 int main(int argc, char** argv) {
@@ -88,7 +94,7 @@ int main(int argc, char** argv) {
 	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 
 	// Leitura dos dados da academia atual
-	status_carregamento = carregaAcad(&usuarios, &academia, &nMatriculas);
+	status_carregamento = carregaAcad(usuarios, &academia, &nMatriculas);
 	if (!status_carregamento) {
 		memset(academia.nome, '\0', TAMANHO_NOME);
 		academia.CNPJ = 0;
@@ -164,8 +170,7 @@ int main(int argc, char** argv) {
 						case 'S':
 						case 's':
 							usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
-							cadastrarUsuarios(&usuarios[nMatriculas]);
-							nMatriculas++;
+							nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
 						break;
 						default:
 						break;
@@ -187,8 +192,7 @@ int main(int argc, char** argv) {
 			break;
 		case 5:
 			usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
-			cadastrarUsuarios(&usuarios[nMatriculas]);
-			nMatriculas++;
+			nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
 			break;
 		case 6:
 			util_imprimeTracinhos(5);
@@ -209,7 +213,7 @@ int main(int argc, char** argv) {
 	} while (opcao);
 
 	// salvamento em arquivo <db.bin>
-	salvaTudo(usuarios, academia);
+	salvaTudo(usuarios, academia, nMatriculas);
 
 	return SUCESSO;
 }
