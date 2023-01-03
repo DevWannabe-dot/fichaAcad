@@ -64,7 +64,7 @@ uint8_t carregaAcad(usuario_t* usuarios, academia_t* academia, int* nMatriculas)
 			break;
 		}
 		for (i = 0; i < (*nMatriculas); i++) {
-			while (!feof(arquivo)) {
+			if (!feof(arquivo)) {
 				fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
 				fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
 			}
@@ -123,6 +123,7 @@ void salvaTudo(usuario_t* usuarios, academia_t academia, int nMatriculas) {
 			fwrite(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
 			fwrite(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
 			nMatriculas--;
+			i++;
 		}
 
 		fclose(arquivo);
