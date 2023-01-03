@@ -191,20 +191,24 @@ int main(int argc, char** argv) {
 			if (privilegiosAdmin) fprintf(stderr, "<Admin ativado!>\n");
 			break;
 		case 5:
-			usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
-			nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
+			if (privilegiosAdmin) {
+				usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
+				nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
+			}
 			break;
 		case 6:
-			util_imprimeTracinhos(5);
-			printf(" DADOS ATUAIS ");
-			util_imprimeTracinhos(5);
-			printf("\n"
-				"Nome		%s\n"
-				"CNPJ		%llu\n"
-				"Endereço	%s\n"
-				"E-mail		%s\n"
-				"Telefone	%llu\n", academia.nome, academia.CNPJ, academia.endereco, academia.email, academia.telefone);
-			// editar
+			if (privilegiosAdmin) {
+				util_imprimeTracinhos(5);
+				printf(" DADOS ATUAIS ");
+				util_imprimeTracinhos(5);
+				printf("\n"
+					"Nome		%s\n"
+					"CNPJ		%llu\n"
+					"Endereço	%s\n"
+					"E-mail		%s\n"
+					"Telefone	%llu\n", academia.nome, academia.CNPJ, academia.endereco, academia.email, academia.telefone);
+				// editar
+			}
 			break;
 		default:
 			fprintf(stderr, "<Erro na leitura da opção.>\n");
