@@ -12,6 +12,10 @@
 #define TAMANHO_EMAIL		(50+1)
 #define TAMANHO_ALONGAR		(50+1)
 #define NUM_TREINOS_MAX		(26)
+#define ERRO_CADASTRO		(0)
+#define CADASTRO_OK			(1)
+#define POW_2_32_CARACTERES	(10 + 1)
+#define POW_2_64_CARACTERES	(20 + 1)
 
 // Tipos
 typedef struct exercicio_estrutura {
