@@ -15,13 +15,15 @@
 // Tipos
 
 // Funcoes
-void criarNomeArquivo(academia_t* academia, char nome[]) {
-	char str1[sizeof(unsigned long long) + 1];
+void criarNomeArquivo(academia_t* academia, char nome[], const int tamanho, int numeral) {
+	char* str1 = malloc(sizeof(char) * tamanho);
 	char str2[] = ".txt";
 
-	util_converteInteiroParaTexto((int)academia->CNPJ, str1);
-	strcpy(nome, str1);
+	util_converteInteiroParaTexto(numeral, str1);
+	if (str1) strcpy(nome, str1);
 	strncat(nome, str2, 4);
+
+	// tamanho <= tamanho de nome
 }
 
 uint8_t carregaUsuarios(usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
@@ -36,10 +38,11 @@ uint8_t carregaUsuarios(usuario_t** usuarios, int* nMatriculas, FILE* arquivo, l
 	return false;
 }
 
-uint8_t carregaAcad(usuario_t** usuarios, academia_t* academia, int* nMatriculas) {
+uint8_t carregaAcad(usuario_t* usuarios, academia_t* academia, int* nMatriculas) {
 	FILE* arquivo;
 	long cursor = 0;
 	char nome[TAMANHO_NOME];
+	int i = 0;
 
 	uint8_t status_carregamento = 0;
 
@@ -56,13 +59,21 @@ uint8_t carregaAcad(usuario_t** usuarios, academia_t* academia, int* nMatriculas
 			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
 			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
 			fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
+
+			fread(nMatriculas, sizeof(int), 1, arquivo);
 			break;
+		}
+		for (i = 0; i < (*nMatriculas); i++) {
+			while (!feof(arquivo)) {
+				fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
+				fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
+			}
 		}
 
 		fclose(arquivo);
 
 		// academia.txt
-		criarNomeArquivo(academia, nome);
+		criarNomeArquivo(academia, nome, POW_2_64_CARACTERES, (int)academia->CNPJ);
 		arquivo = fopen(nome, "r");
 
 		if (arquivo) {
@@ -91,7 +102,7 @@ uint8_t carregaAcad(usuario_t** usuarios, academia_t* academia, int* nMatriculas
 	return status_carregamento;
 }
 
-void salvaTudo(usuario_t* usuarios, academia_t academia) {
+void salvaTudo(usuario_t* usuarios, academia_t academia, int nMatriculas) {
 	int i = 0;
 	FILE* arquivo = fopen("db.bin", "wb");
 	char nome[TAMANHO_NOME];
@@ -105,16 +116,18 @@ void salvaTudo(usuario_t* usuarios, academia_t academia) {
 		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo);
 		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo);
 
+		fwrite(&nMatriculas, sizeof(int), 1, arquivo);
+
 		// Matriculas (nome)
-		while (usuarios[i].matricula) {
+		while (nMatriculas) {
 			fwrite(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
 			fwrite(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
-			i++;
+			nMatriculas--;
 		}
 
 		fclose(arquivo);
 	}
-	criarNomeArquivo(&academia, nome);
+	criarNomeArquivo(&academia, nome, POW_2_64_CARACTERES, (int)academia.CNPJ);
 	arquivo = fopen(nome, "w");
 }
 
