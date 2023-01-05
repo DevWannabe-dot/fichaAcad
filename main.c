@@ -162,26 +162,37 @@ int main(int argc, char** argv) {
 			if (nMatriculas) {
 				listaMatriculas(usuarios, nMatriculas);
 			}
-			else {
-				if (privilegiosAdmin) {
-					fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
-					scanf("%c%c", &escolha, &lixo);
-					switch (escolha) {
-						case 'S':
-						case 's':
-							usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
-							nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
-						break;
-						default:
-						break;
-					}
+			else if (privilegiosAdmin) {
+				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
+				scanf("%c%c", &escolha, &lixo);
+				switch (escolha) {
+					case 'S':
+					case 's':
+						usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
+						nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
+					break;
+					default:
+					break;
 				}
 			}
 			break;
 		case 2:
 			if (status_carregamento > 1) {
 				// código aqui
-			} else if (status_carregamento < 1) fprintf(stderr, "<Não há usuários na sua academia. Deseja cadastrar?>\n");
+			}
+			else if (privilegiosAdmin) {
+				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
+				scanf("%c%c", &escolha, &lixo);
+				switch (escolha) {
+				case 'S':
+				case 's':
+					usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
+					nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
+					break;
+				default:
+					break;
+				}
+			}
 			break;
 		case 3:
 			// procurar matricula por parte do nome
