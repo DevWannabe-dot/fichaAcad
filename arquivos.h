@@ -26,11 +26,17 @@ void criarNomeArquivo(academia_t* academia, char nome[], const int tamanho, int 
 	// tamanho <= tamanho de nome
 }
 
-uint8_t carregaUsuarios(usuario_t** usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
+uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
+	int i = 0;
 
-	while (!feof(arquivo)) {
-		fseek(arquivo, 0, SEEK_SET);
-		fscanf(arquivo, "%i", nMatriculas);
+	if (!feof(arquivo)) {
+		fseek(arquivo, (*cursor), SEEK_SET);
+		fread(nMatriculas, sizeof(int), 1, arquivo);
+		while (!feof(arquivo)) {
+			fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
+			fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
+			i++;
+		}
 		*cursor = ftell(arquivo);
 		return 1;
 	}
@@ -51,8 +57,7 @@ uint8_t carregaAcad(usuario_t* usuarios, academia_t* academia, int* nMatriculas)
 	if (arquivo) {
 		fseek(arquivo, 0, SEEK_SET);
 
-		// loop mantido apenas para evitar ler um arquivo vazio
-		while (!feof(arquivo)) {
+		if (!feof(arquivo)) {
 			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
 			printf("Academia: %s...\n\n", academia->nome);
 			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
@@ -60,25 +65,11 @@ uint8_t carregaAcad(usuario_t* usuarios, academia_t* academia, int* nMatriculas)
 			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
 			fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
 
-			fread(nMatriculas, sizeof(int), 1, arquivo);
-			break;
+			cursor = ftell(arquivo);
 		}
-		for (i = 0; i < (*nMatriculas); i++) {
-			if (!feof(arquivo)) {
-				fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
-				fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
-			}
-		}
-
-		fclose(arquivo);
-
-		// academia.txt
-		criarNomeArquivo(academia, nome, POW_2_64_CARACTERES, (int)academia->CNPJ);
-		arquivo = fopen(nome, "r");
 
 		if (arquivo) {
-			status_carregamento++;
-			status_carregamento += carregaUsuarios(usuarios, nMatriculas, arquivo, &cursor);
+			status_carregamento += 1 + carregaUsuarios(usuarios, nMatriculas, arquivo, &cursor);
 
 			switch (status_carregamento) {
 			case 0:
