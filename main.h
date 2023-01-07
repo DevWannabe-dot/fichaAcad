@@ -16,6 +16,7 @@
 #define CADASTRO_OK			(1)
 #define POW_2_32_CARACTERES	(10 + 1)
 #define POW_2_64_CARACTERES	(20 + 1)
+#define NADA_ENCONTRADO		(-1)
 
 // Tipos
 typedef struct exercicio_estrutura {
