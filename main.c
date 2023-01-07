@@ -100,7 +100,7 @@ int main(int argc, char** argv) {
 	uint8_t status_carregamento;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
-	bool privilegiosAdmin = false;
+	bool privilegiosAdmin = false, algoMudou = false;
 
 	setlocale(LC_CTYPE, "Portuguese");
 
@@ -225,6 +225,7 @@ int main(int argc, char** argv) {
 			if (privilegiosAdmin) {
 				usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 				nMatriculas += cadastrarUsuarios(academia, &usuarios[nMatriculas]);
+				algoMudou = true;
 			}
 			break;
 		case 6:
@@ -239,6 +240,7 @@ int main(int argc, char** argv) {
 					"E-mail		%s\n"
 					"Telefone	%llu\n", academia.nome, academia.CNPJ, academia.endereco, academia.email, academia.telefone);
 				// editar
+				algoMudou = true;
 			}
 			break;
 		default:
@@ -248,7 +250,9 @@ int main(int argc, char** argv) {
 	} while (opcao);
 
 	// salvamento em arquivo <db.bin>
-	salvaTudo(usuarios, academia, nMatriculas);
+	if (algoMudou) {
+		salvaTudo(usuarios, academia, nMatriculas);
+	}
 
 	return SUCESSO;
 }
