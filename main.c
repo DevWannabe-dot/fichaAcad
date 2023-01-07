@@ -79,9 +79,24 @@ int cadastrarUsuarios(academia_t academia, usuario_t* usuarioAtual){
 	return CADASTRO_OK;
 }
 
+int buscaUsuario(usuario_t* usuarios, int matricula, int nMatriculas) {
+	for (int i = 0; i < nMatriculas; i++) {
+		if (usuarios[i].matricula == matricula) {
+			return i;
+		}
+	}
+	return NADA_ENCONTRADO;
+}
+
+void acessarUsuario(usuario_t* usuarioAtual){
+	
+	imprimeUsuarioUnico(usuarioAtual);
+	puts("Treinos: ");
+}
+
 int main(int argc, char** argv) {
 	char lixo, backup[TAMANHO_ENDERECO], escolha;
-	int nMatriculas = 0, opcao = 0;
+	int nMatriculas = 0, opcao = 0, mat_lida;
 	uint8_t status_carregamento;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
@@ -178,7 +193,12 @@ int main(int argc, char** argv) {
 			break;
 		case 2:
 			if (status_carregamento > 1) {
-				// código aqui
+				printf("\nInsira a matricula: ");
+				scanf("%i%c", &mat_lida, &lixo);
+				mat_lida = buscaUsuario(usuarios, mat_lida, nMatriculas);
+				if (mat_lida != -1) {
+					acessarUsuario(&usuarios[mat_lida]);
+				}
 			}
 			else if (privilegiosAdmin) {
 				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
