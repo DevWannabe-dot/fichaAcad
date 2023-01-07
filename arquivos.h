@@ -26,18 +26,18 @@ void criarNomeArquivo(academia_t* academia, char nome[], const int tamanho, int 
 	// tamanho <= tamanho de nome
 }
 
-uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo, long* cursor) {
+uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo_c, long* cursor) {
 	int i = 0;
 
-	if (!feof(arquivo)) {
-		fseek(arquivo, (*cursor), SEEK_SET);
-		fread(nMatriculas, sizeof(int), 1, arquivo);
-		while (!feof(arquivo)) {
-			fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
-			fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
+	if (!feof(arquivo_c)) {
+		fseek(arquivo_c, (*cursor), SEEK_SET);
+		fread(nMatriculas, sizeof(int), 1, arquivo_c);
+		while (!feof(arquivo_c)) {
+			fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo_c);
+			fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo_c);
 			i++;
 		}
-		*cursor = ftell(arquivo);
+		*cursor = ftell(arquivo_c);
 		return 1;
 	}
 
@@ -45,82 +45,79 @@ uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo, lo
 }
 
 uint8_t carregaAcad(usuario_t* usuarios, academia_t* academia, int* nMatriculas) {
-	FILE* arquivo;
+	FILE* arquivo_c;
 	long cursor = 0;
-	char nome[TAMANHO_NOME];
 	int i = 0;
 
 	uint8_t status_carregamento = 0;
 
-	arquivo = fopen("db.bin", "rb");
+	arquivo_c = fopen("db.bin", "rb");
 
-	if (arquivo) {
-		fseek(arquivo, 0, SEEK_SET);
+	if (arquivo_c) {
+		fseek(arquivo_c, 0, SEEK_SET);
 
-		if (!feof(arquivo)) {
-			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo);
+		if (!feof(arquivo_c)) {
+			fread(&academia->nome, sizeof(char), TAMANHO_NOME, arquivo_c);
 			printf("Academia: %s...\n\n", academia->nome);
-			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo);
-			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
-			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo);
-			fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo);
+			fread(&academia->CNPJ, sizeof(unsigned long long), 1, arquivo_c);
+			fread(&academia->endereco, sizeof(char), TAMANHO_ENDERECO, arquivo_c);
+			fread(&academia->email, sizeof(char), TAMANHO_EMAIL, arquivo_c);
+			fread(&academia->telefone, sizeof(unsigned long long), 1, arquivo_c);
 
-			cursor = ftell(arquivo);
+			cursor = ftell(arquivo_c);
 		}
 
-		if (arquivo) {
-			status_carregamento += 1 + carregaUsuarios(usuarios, nMatriculas, arquivo, &cursor);
+		status_carregamento += 1 + carregaUsuarios(usuarios, nMatriculas, arquivo_c, &cursor);
 
-			switch (status_carregamento) {
-			case 0:
-				break;
-			case 1:
-			academia_section:
-				printf("<Academia encontrada!>\n");
-				break;
-			case 2:
-				printf("<Usuarios encontrados!>\n");
-				goto academia_section;
-				break;
-			default:
-				fprintf(stderr, "<Erro desconhecido.>\n");
-				break;
-			}
-
-			fclose(arquivo);
+		switch (status_carregamento) {
+		case 0:
+			break;
+		case 1:
+		academia_section:
+			printf("<Academia encontrada!>\n");
+			break;
+		case 2:
+			printf("<Usuarios encontrados!>\n");
+			goto academia_section;
+			break;
+		default:
+			fprintf(stderr, "<Erro desconhecido.>\n");
+			break;
 		}
+
+		// fclose(arquivo_c);
 	}
 	return status_carregamento;
 }
 
 void salvaTudo(usuario_t* usuarios, academia_t academia, int nMatriculas) {
 	int i = 0;
-	FILE* arquivo = fopen("db.bin", "wb");
+	FILE* arquivo_s = fopen("db.bin", "wb");
 	char nome[TAMANHO_NOME];
 
-	if (arquivo) {
-		fseek(arquivo, 0, SEEK_SET);
+	if (arquivo_s) {
+		fseek(arquivo_s, 0, SEEK_SET);
 
-		fwrite(&academia.nome, sizeof(char), TAMANHO_NOME, arquivo);
-		fwrite(&academia.CNPJ, sizeof(unsigned long long), 1, arquivo);
-		fwrite(&academia.endereco, sizeof(char), TAMANHO_ENDERECO, arquivo);
-		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo);
-		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo);
+		fwrite(&academia.nome, sizeof(char), TAMANHO_NOME, arquivo_s);
+		fwrite(&academia.CNPJ, sizeof(unsigned long long), 1, arquivo_s);
+		fwrite(&academia.endereco, sizeof(char), TAMANHO_ENDERECO, arquivo_s);
+		fwrite(&academia.email, sizeof(char), TAMANHO_EMAIL, arquivo_s);
+		fwrite(&academia.telefone, sizeof(unsigned long long), 1, arquivo_s);
 
-		fwrite(&nMatriculas, sizeof(int), 1, arquivo);
+		fwrite(&nMatriculas, sizeof(int), 1, arquivo_s);
 
 		// Matriculas (nome)
 		while (nMatriculas) {
-			fwrite(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo);
-			fwrite(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo);
+			fwrite(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo_s);
+			fwrite(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo_s);
 			nMatriculas--;
 			i++;
 		}
 
-		fclose(arquivo);
+		fclose(arquivo_s);
 	}
 	criarNomeArquivo(&academia, nome, POW_2_64_CARACTERES, (int)academia.CNPJ);
-	arquivo = fopen(nome, "w");
+	arquivo_s = fopen(nome, "w");
 }
 
 #endif
