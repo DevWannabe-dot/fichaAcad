@@ -94,9 +94,17 @@ void acessarUsuario(usuario_t* usuarioAtual){
 	puts("Treinos: ");
 }
 
+void pesquisa_MatriculaNome(usuario_t* usuarios, char nome[], int nMatriculas) {
+	for (int i = 0; i < nMatriculas; i++){
+		if (strstr(usuarios[i].nome, nome)) {
+			imprimeUsuarioUnico(&usuarios[i]);
+		}
+	}
+}
+
 int main(int argc, char** argv) {
 	char lixo, backup[TAMANHO_ENDERECO], escolha, nome_lido[TAMANHO_NOME];
-	int nMatriculas = 0, opcao = 0, mat_lida;
+	int nMatriculas = 0, opcao = 0, mat_lida, encontradoEm;
 	uint8_t status_carregamento;
 	academia_t academia;
 	usuario_t* usuarios = NULL;
@@ -195,9 +203,9 @@ int main(int argc, char** argv) {
 			if (status_carregamento > 1) {
 				printf("\nInsira a matricula: ");
 				scanf("%i%c", &mat_lida, &lixo);
-				mat_lida = buscaUsuario(usuarios, mat_lida, nMatriculas);
-				if (mat_lida != -1) {
-					acessarUsuario(&usuarios[mat_lida]);
+				encontradoEm = buscaUsuario(usuarios, mat_lida, nMatriculas);
+				if (encontradoEm != -1) {
+					acessarUsuario(&usuarios[encontradoEm]);
 				}
 			}
 			else if (privilegiosAdmin) {
@@ -215,9 +223,11 @@ int main(int argc, char** argv) {
 			}
 			break;
 		case 3:
-			printf("Insira parte do nome o qual deseja buscar: ");
+			printf("\nInsira parte do nome o qual deseja buscar: ");
 			fgets(nome_lido, TAMANHO_NOME, stdin);
 			util_removeQuebraLinhaFinal(nome_lido);
+
+			pesquisa_MatriculaNome(usuarios, nome_lido, nMatriculas);
 			break;
 		case 4:
 			privilegiosAdmin = true;
