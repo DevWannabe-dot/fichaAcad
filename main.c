@@ -95,7 +95,7 @@ void acessarUsuario(usuario_t* usuarioAtual){
 }
 
 int main(int argc, char** argv) {
-	char lixo, backup[TAMANHO_ENDERECO], escolha;
+	char lixo, backup[TAMANHO_ENDERECO], escolha, nome_lido[TAMANHO_NOME];
 	int nMatriculas = 0, opcao = 0, mat_lida;
 	uint8_t status_carregamento;
 	academia_t academia;
@@ -215,7 +215,9 @@ int main(int argc, char** argv) {
 			}
 			break;
 		case 3:
-			// procurar matricula por parte do nome
+			printf("Insira parte do nome o qual deseja buscar: ");
+			fgets(nome_lido, TAMANHO_NOME, stdin);
+			util_removeQuebraLinhaFinal(nome_lido);
 			break;
 		case 4:
 			privilegiosAdmin = true;
