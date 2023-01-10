@@ -32,7 +32,11 @@ uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo_c, 
 	if (!feof(arquivo_c)) {
 		fseek(arquivo_c, (*cursor), SEEK_SET);
 		fread(nMatriculas, sizeof(int), 1, arquivo_c);
+
+		usuarios = (usuario_t*)realloc(usuarios, (*nMatriculas + 1));
+
 		while (!feof(arquivo_c)) {
+			printf("CURSOR = %i", ftell(arquivo_c));
 			fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo_c);
 			fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo_c);
 			i++;
