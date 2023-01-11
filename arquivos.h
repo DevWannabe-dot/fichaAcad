@@ -28,6 +28,7 @@ void criarNomeArquivo(academia_t* academia, char nome[], const int tamanho, int 
 
 uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo_c, long* cursor) {
 	int i = 0;
+	long k = 0;
 
 	if (!feof(arquivo_c)) {
 		fseek(arquivo_c, (*cursor), SEEK_SET);
@@ -35,11 +36,12 @@ uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo_c, 
 
 		usuarios = (usuario_t*)realloc(usuarios, (*nMatriculas + 1));
 
-		while (!feof(arquivo_c)) {
-			printf("CURSOR = %i", ftell(arquivo_c));
-			fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo_c);
-			fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo_c);
-			i++;
+		for (int i = 0; i < *nMatriculas; i++) {
+			if (!feof(arquivo_c)) {
+				printf("CURSOR = %i", k);
+				fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo_c);
+				fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo_c);
+			}
 		}
 		*cursor = ftell(arquivo_c);
 		return 1;
