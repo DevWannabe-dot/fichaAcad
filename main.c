@@ -19,6 +19,7 @@
 #include <locale.h>
 #include <time.h>
 #include <math.h>
+#include <ctype.h>
 #include "util.h"
 #include "main.h"
 #include "arquivos.h"
@@ -63,6 +64,9 @@ int cadastrarUsuarios(academia_t academia, usuario_t* usuarioAtual){
 	printf("Nome do usuário: ");
 	fgets(usuarioAtual->nome, TAMANHO_NOME, stdin);
 	util_removeQuebraLinhaFinal(usuarioAtual->nome);
+	for (int i = 0; i < strlen(usuarioAtual->nome); i++) {
+		toupper(usuarioAtual->nome[i]);
+	}
 
 	printf("Deseja atribuir treinos a este usuário (S/N)?");
 	scanf("%c%c", &escolha, &lixo);
