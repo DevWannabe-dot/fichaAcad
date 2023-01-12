@@ -111,14 +111,13 @@ int main(int argc, char** argv) {
 	int nMatriculas = 0, opcao = 0, mat_lida, encontradoEm;
 	uint8_t status_carregamento;
 	academia_t academia;
-	usuario_t* usuarios = NULL;
+	usuario_t* usuarios = (usuario_t*)calloc((nMatriculas + 1), sizeof(usuario_t));
 	bool privilegiosAdmin = false, algoMudou = false;
 
 	setlocale(LC_CTYPE, "Portuguese");
 
 	// Le arquivo db.bin e cada arquivo de texto correspondente à matrícula
 	printf("<LENDO CREDENCIAIS DA ACADEMIA...>\n");
-	usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
 
 	// Leitura dos dados da academia atual
 	status_carregamento = carregaAcad(usuarios, &academia, &nMatriculas);
@@ -178,8 +177,7 @@ int main(int argc, char** argv) {
 		util_imprimeTracinhos(5);
 		printf(">> ");
 		
-		
-		scanf("%i%c", &opcao, &lixo);
+		scanf("%d", &opcao);
 
 		switch (opcao) {
 		case 0:
