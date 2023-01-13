@@ -38,7 +38,7 @@ uint8_t carregaUsuarios(usuario_t* usuarios, int* nMatriculas, FILE* arquivo_c, 
 
 		for (int i = 0; i < *nMatriculas; i++) {
 			if (!feof(arquivo_c)) {
-				printf("CURSOR = %i", k);
+				printf("\nCURSOR = %i", k);
 				fread(&usuarios[i].matricula, sizeof(unsigned), 1, arquivo_c);
 				fread(&usuarios[i].nome, sizeof(char), TAMANHO_NOME, arquivo_c);
 			}
