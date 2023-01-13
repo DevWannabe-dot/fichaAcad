@@ -107,7 +107,7 @@ void pesquisa_MatriculaNome(usuario_t* usuarios, char nome[], int nMatriculas) {
 }
 
 int main(int argc, char** argv) {
-	char lixo, backup[TAMANHO_ENDERECO], escolha, nome_lido[TAMANHO_NOME];
+	char lixo, backup[TAMANHO_ENDERECO], escolha[2], nome_lido[TAMANHO_NOME];
 	int nMatriculas = 0, opcao = 0, mat_lida, encontradoEm;
 	uint8_t status_carregamento;
 	academia_t academia;
@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
 		util_imprimeTracinhos(5);
 		printf(">> ");
 		
-		scanf("%d", &opcao);
+		scanf("%d%c", &opcao, &lixo);
 
 		switch (opcao) {
 		case 0:
@@ -189,8 +189,8 @@ int main(int argc, char** argv) {
 			}
 			else if (privilegiosAdmin) {
 				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
-				scanf("%c%c", &escolha, &lixo);
-				switch (escolha) {
+				fgets(escolha, 2, stdin);
+				switch (escolha[0]) {
 					case 'S':
 					case 's':
 						usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
@@ -213,7 +213,7 @@ int main(int argc, char** argv) {
 			else if (privilegiosAdmin) {
 				fprintf(stderr, "Não há usuários na sua academia. Deseja cadastrar (S/N)?\n");
 				scanf("%c%c", &escolha, &lixo);
-				switch (escolha) {
+				switch (escolha[0]) {
 				case 'S':
 				case 's':
 					usuarios = (usuario_t*)realloc(usuarios, sizeof(usuario_t) * (nMatriculas + 1));
